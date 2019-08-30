@@ -78,6 +78,26 @@ func ParseServiceResponse(data []byte) (*AuthenticationResponse, error) {
 		return nil, err
 	}
 
+	if x.Success != nil &&
+		x.Success.Attributes != nil &&
+		x.Success.Attributes.AuthenticationDateRaw != "" {
+
+		// Remove trailing [Zulu]/[ETC/UTC] designations that come from Apereo CAS
+		x.Success.Attributes.AuthenticationDateRaw = strings.SplitN(
+			x.Success.Attributes.AuthenticationDateRaw,
+			"[",
+			2,
+		)[0]
+
+		t, err := time.Parse(time.RFC3339, x.Success.Attributes.AuthenticationDateRaw)
+		if err != nil {
+			return nil, fmt.Errorf("Error while trying to parse AuthenticationDate field: %s", err)
+		}
+
+		x.Success.Attributes.AuthenticationDate = t
+
+	}
+
 	if x.Failure != nil {
 		msg := strings.TrimSpace(x.Failure.Message)
 		err := &AuthenticationError{Code: x.Failure.Code, Message: msg}

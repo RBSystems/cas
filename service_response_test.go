@@ -94,6 +94,29 @@ func TestUnmarshalSuccessfulServiceResponseWithAttributes(t *testing.T) {
 	}
 }
 
+func TestUnmarshalSuccessfulServiceResponseWithAspereoCasZonedDateTimeFormat(t *testing.T) {
+	s := `<?xml version="1.0"?>
+<cas:serviceResponse xmlns:cas="http://www.yale.edu/tp/cas">
+  <cas:authenticationSuccess>
+    <cas:user>username</cas:user>
+    <cas:attributes>
+      <cas:authenticationDate>2015-02-10T14:28:42Z[Zulu]</cas:authenticationDate>
+    </cas:attributes>
+  </cas:authenticationSuccess>
+</cas:serviceResponse>`
+
+	sr, err := ParseServiceResponse([]byte(s))
+	if err != nil {
+		t.Errorf("Unmarshal service response failed: %v", err)
+	}
+
+	authDate := time.Date(2015, 2, 10, 14, 28, 42, 0, time.UTC)
+	if sr.AuthenticationDate != authDate {
+		t.Errorf("Expected AuthenticationDate to be <%v>, got <%v>", authDate,
+			sr.AuthenticationDate)
+	}
+}
+
 func TestUnmarshalSuccessfulServiceResponseWithUserAttributesRecommendedForm(t *testing.T) {
 	s := `<?xml version="1.0"?>
 <cas:serviceResponse xmlns:cas="http://www.yale.edu/tp/cas">
