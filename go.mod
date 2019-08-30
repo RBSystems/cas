@@ -1,4 +1,4 @@
-module github.com/byuoitav/cas
+module github.com/byuoitav/cas/v2
 
 go 1.12
 
