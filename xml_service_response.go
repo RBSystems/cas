@@ -38,7 +38,8 @@ func (p *xmlProxies) AddProxy(proxy string) {
 
 type xmlAttributes struct {
 	XMLName                                xml.Name  `xml:"attributes"`
-	AuthenticationDate                     time.Time `xml:"authenticationDate"`
+	AuthenticationDate                     time.Time `xml:"-"`
+	AuthenticationDateRaw                  string    `xml:"authenticationDate"`
 	LongTermAuthenticationRequestTokenUsed bool      `xml:"longTermAuthenticationRequestTokenUsed"`
 	IsFromNewLogin                         bool      `xml:"isFromNewLogin"`
 	MemberOf                               []string  `xml:"memberOf"`
@@ -64,6 +65,14 @@ type xmlAnyAttribute struct {
 }
 
 func (xsr *xmlServiceResponse) marshalXML(indent int) ([]byte, error) {
+
+	if xsr.Success != nil &&
+		xsr.Success.Attributes != nil {
+
+		t := xsr.Success.Attributes.AuthenticationDate.Format(time.RFC3339)
+		xsr.Success.Attributes.AuthenticationDateRaw = t
+	}
+
 	if indent == 0 {
 		return xml.Marshal(xsr)
 	}
